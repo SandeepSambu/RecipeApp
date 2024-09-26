@@ -1,0 +1,104 @@
+package org.example.project
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+
+@Composable
+fun RecipeDetailScreen(
+    recipeId: String,
+    navController: NavController,
+    myViewModel: MyViewModel,
+    favouriteRecipes: FavouriteRecipes
+) {
+    val recipe = RecipeRepository(myViewModel).getAllRecipes().find { it.id.toString() == recipeId }
+//    val modifier = Modifier.fillMaxWidth()
+
+    class ModifierClass {
+        val modifier = Modifier.fillMaxWidth()
+        val flag = false
+    }
+
+    val modifier = ModifierClass()
+
+    // If the recipe is found, display its details
+    recipe?.let {
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground // Text color on the background
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 65.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Box { // Box to overlap image and text
+                    Image(recipe = recipe, favouriteRecipes = favouriteRecipes, modifier = modifier.modifier, flag = modifier.flag)
+                    IconButton(onClick = {
+                        navController.navigate("recipe_list")
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+                Column(
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Text(text = it.name, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.testTag("abc"))
+                    Spacer(modifier = Modifier.height(5.dp))   // Spacer for vertical spacing
+                    Text(text = it.cuisine, style = MaterialTheme.typography.headlineMedium)
+                    Spacer(modifier = Modifier.padding(vertical = 10.dp))
+                    Text(text = "INGREDIENTS", style = MaterialTheme.typography.headlineSmall)
+                    Spacer(modifier = Modifier.padding(vertical = 2.dp))
+                    recipe.ingredients.forEach {
+                        Text(text = it, style = MaterialTheme.typography.bodyLarge)
+                        Spacer(modifier = Modifier.padding(vertical = 2.dp))
+                    }
+                    Spacer(modifier = Modifier.padding(vertical = 10.dp))
+                    Text(text = "INSTRUCTIONS TO PREPARE RECIPE", style = MaterialTheme.typography.headlineSmall)
+                    Spacer(modifier = Modifier.padding(vertical = 2.dp))
+                    recipe.instructions.forEach {
+                        Text(text = it, style = MaterialTheme.typography.bodyLarge)
+                        Spacer(modifier = Modifier.padding(vertical = 1.dp))
+                    }
+                }
+            }
+        }
+    }?: run {
+        Text(text = "Recipe Not Found")
+    }
+}
+
+@Preview
+@Composable
+fun RecipeDetailScreenPreview() {
+    RecipeDetailScreen(
+        recipeId = "1",
+        navController = rememberNavController(),
+        myViewModel = MyViewModel(),
+        favouriteRecipes = FavouriteRecipes()
+    )
+}
