@@ -1,18 +1,9 @@
-This is a Kotlin Multiplatform project targeting Android, Web.
+RecipeDemo 🍲
+RecipeDemo is a Kotlin Multiplatform application that allows users to explore, search, and save their favorite recipes. Built using Jetpack Compose for Android and Compose for Web for WebAssembly, it provides a seamless experience across platforms with shared business logic and distinct UIs for each platform.
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
-
-
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
-
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [GitHub](https://github.com/JetBrains/compose-multiplatform/issues).
-
-You can open the web application by running the `:composeApp:wasmJsBrowserDevelopmentRun` Gradle task.
+Features ✨
+    - Recipe List: Browse a list of recipes with the ability to filter by category.
+    - Search Functionality: Search for recipes by name to find exactly what you're looking for.
+    - Favorites Management: Mark recipes as favorites and easily switch between viewing all recipes and favorites.
+    - Theme Toggle: Switch between light and dark mode based on user preference.
+    - Responsive Layout: Automatically adapts the UI between mobile and web platforms, using a dynamic grid layout.
