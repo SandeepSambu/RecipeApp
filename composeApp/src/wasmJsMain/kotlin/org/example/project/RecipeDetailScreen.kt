@@ -38,7 +38,8 @@ fun RecipeDetailScreen(
 //    val modifier = Modifier.fillMaxWidth().height(500.dp)
 
     class ModifierClass {
-        val modifier = Modifier.fillMaxSize()
+        val imgModifier = Modifier.fillMaxSize()
+        val iconModifier = Modifier
         val flag = true
     }
 
@@ -59,7 +60,8 @@ fun RecipeDetailScreen(
                         Image(
                             recipe = recipe,
                             favouriteRecipes = favouriteRecipes,
-                            modifier = modifier.modifier,
+                            imgModifier = modifier.imgModifier,
+                            iconModifier = modifier.iconModifier,
                             flag = modifier.flag
                         )
 

@@ -1,5 +1,6 @@
 package org.example.project
 
+import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,8 +30,11 @@ import androidx.compose.ui.unit.dp
 fun RecipeCard(recipe: Recipe, onClick: () -> Unit, favouriteRecipes: FavouriteRecipes) {
 //    val modifier = Modifier.height(200.dp)
 
+    val configuration = LocalConfiguration.current
+
     class ModifierClass {
-        val modifier = Modifier.height(200.dp)
+        val imgModifier = if(configuration.orientation == Configuration.ORIENTATION_PORTRAIT) Modifier.height(200.dp) else Modifier.height(150.dp)
+        val iconModifier = Modifier.padding(start = 400.dp)
         val flag = false
     }
 
@@ -46,7 +51,13 @@ fun RecipeCard(recipe: Recipe, onClick: () -> Unit, favouriteRecipes: FavouriteR
         elevation = 4.dp // Elevation for shadow effect
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Image(recipe = recipe, favouriteRecipes = favouriteRecipes, modifier = modifier.modifier, flag = modifier.flag)
+            Image(
+                recipe = recipe,
+                favouriteRecipes = favouriteRecipes,
+                imgModifier = modifier.imgModifier,
+                iconModifier = modifier.iconModifier,
+                flag = modifier.flag
+            )
             Spacer(modifier = Modifier.height(10.dp))
             Text(text = recipe.name, style = MaterialTheme.typography.titleLarge)
             Text(text = recipe.cuisine, style = MaterialTheme.typography.bodyMedium)

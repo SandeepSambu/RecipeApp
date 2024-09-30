@@ -26,7 +26,7 @@ import recipedemo.composeapp.generated.resources.white_star
 import recipedemo.composeapp.generated.resources.yellow_star
 
 @Composable
-fun Image(recipe: Recipe, favouriteRecipes: FavouriteRecipes, modifier: Modifier, flag: Boolean) {
+fun Image(recipe: Recipe, favouriteRecipes: FavouriteRecipes, imgModifier: Modifier, iconModifier: Modifier, flag: Boolean) {
     // a coroutine scope for launching suspend functions / asynchronous tasks
     val scope = rememberCoroutineScope()
     // an ImageLoader instance to load images over the network
@@ -55,12 +55,12 @@ fun Image(recipe: Recipe, favouriteRecipes: FavouriteRecipes, modifier: Modifier
             Image(
                 bitmap = image!!, // Safe to use non-null assertion since we're checking if it's null
                 contentDescription = recipe.name,
-                modifier = modifier, // Modifier for customizing the image's appearance
+                modifier = imgModifier, // Modifier for customizing the image's appearance
                 contentScale = ContentScale.FillBounds // Scale the image to fill the given bounds
             )
             if(!flag) {
                 IconButton(
-                    modifier = Modifier.padding(start = 400.dp),
+                    modifier = iconModifier,   //Modifier.padding(start = 400.dp),
                     onClick = {
                         // Toggle the recipe as favorite/non favorite when clicked
                         favouriteRecipes.toggleFavourites(recipe)
