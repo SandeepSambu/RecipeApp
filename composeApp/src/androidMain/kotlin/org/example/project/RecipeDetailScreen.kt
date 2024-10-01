@@ -42,8 +42,20 @@ fun RecipeDetailScreen(
     val configuration = LocalConfiguration.current
 
     class ModifierClass {
-        val imgModifier = if(configuration.orientation == Configuration.ORIENTATION_PORTRAIT) Modifier.fillMaxWidth() else Modifier.fillMaxWidth().height(700.dp)
-        val iconModifier = if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) Modifier.padding(start = 900.dp) else Modifier.padding(start = 400.dp)
+        val imgModifier =
+            if(configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                Modifier.fillMaxWidth()
+            } else {
+                Modifier
+                    .fillMaxWidth()
+                    .height(700.dp)
+            }
+        val iconModifier =
+            if(configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if(configuration.screenWidthDp >= 1000) Modifier.padding(start = 1200.dp ) else Modifier.padding(start = 900.dp)
+            } else {
+                if(configuration.screenWidthDp > 400) Modifier.padding(start = 700.dp) else Modifier.padding(start = 400.dp)
+            }
         val flag = false
     }
 
