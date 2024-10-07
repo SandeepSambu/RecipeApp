@@ -7,4 +7,6 @@ sealed class Route {
     data object RecipeList : Route()
     // Represents the route for the recipe detail screen, containing the recipe ID
     data class RecipeDetail(val recipeId : String) : Route()
+
+    data object ProductList: Route()
 }

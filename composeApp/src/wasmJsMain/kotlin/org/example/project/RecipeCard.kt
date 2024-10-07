@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Card
@@ -36,7 +35,13 @@ fun RecipeCard(recipe: Recipe, onClick: () -> Unit, favouriteRecipes: FavouriteR
     ) {
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Image(recipe = recipe, favouriteRecipes = favouriteRecipes, modifier = modifier.modifier, flag = modifier.flag)
+                RecipeImage(
+                    recipe = recipe,
+                    favouriteRecipes = favouriteRecipes,
+                    imgModifier = modifier.modifier,
+                    iconModifier = Modifier,
+                    flag = modifier.flag
+                )
                 Text(text = recipe.name, style = MaterialTheme.typography.h5)
                 Text(text = recipe.cuisine, style = MaterialTheme.typography.h6)
             }

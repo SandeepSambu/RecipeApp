@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -22,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     private val myViewModel = MyViewModel()
+//    private val productModel = ProductsModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -29,7 +31,8 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             MyApp(navController = navController, myViewModel = myViewModel)
         }
-        myViewModel.fetchAndShowData()
+        myViewModel.fetchRecipeData()
+        myViewModel.fetchProductsData()
     }
 }
 
@@ -40,6 +43,7 @@ fun MyApp(navController: NavHostController, myViewModel: MyViewModel) {
     val color = isSystemInDarkTheme()
     var isDarkTheme by remember { mutableStateOf(color) }
     var searchText by remember { mutableStateOf("") }
+    var expanded by rememberSaveable { mutableStateOf(false) }
     MaterialTheme(
         colorScheme = if(isDarkTheme) darkColorScheme() else lightColorScheme()
     ) {
@@ -54,7 +58,8 @@ fun MyApp(navController: NavHostController, myViewModel: MyViewModel) {
                         navController = navController,
                         searchText = searchText,
                         onSearchTextChange = { newText -> searchText = newText },
-                        onThemeToggle = { isDarkTheme = !isDarkTheme }
+                        onThemeToggle = { isDarkTheme = !isDarkTheme },
+                        expanded = { expanded = !expanded }
                     )
                 },
                 content = { paddingValues ->
@@ -63,7 +68,8 @@ fun MyApp(navController: NavHostController, myViewModel: MyViewModel) {
                         searchText = searchText,
                         isDarkTheme = isDarkTheme,
                         paddingValues = paddingValues,
-                        myViewModel = myViewModel
+                        myViewModel = myViewModel,
+                        expanded = expanded
                     )
                 }
             )
@@ -78,7 +84,8 @@ fun RecipeApp(
     searchText: String,
     isDarkTheme: Boolean,
     paddingValues: PaddingValues,
-    myViewModel: MyViewModel
+    myViewModel: MyViewModel,
+    expanded: Boolean
 ) {
     val favouriteRecipes = FavouriteRecipes()
 
@@ -91,7 +98,8 @@ fun RecipeApp(
                 searchText = searchText,
                 isDarkTheme = isDarkTheme,
                 paddingValues = paddingValues,
-                myViewModel = myViewModel
+                myViewModel = myViewModel,
+                expanded = expanded
             )
         }
 
@@ -106,6 +114,15 @@ fun RecipeApp(
                     favouriteRecipes = favouriteRecipes
                 )
             }
+        }
+
+        composable("product_list") {
+            ProductListScreen(
+                navController = navController,
+                myViewModel = myViewModel,
+                paddingValues = paddingValues,
+                expanded = expanded
+            )
         }
     }
 }

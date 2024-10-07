@@ -1,25 +1,30 @@
 package org.example.project
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -40,10 +45,13 @@ import kotlinx.browser.window
 @Composable
 fun RecipeListScreen(
     onRecipeSelected: (String) -> Unit, // Callback for when a recipe is selected
+    onRecipeList: () -> Unit,
+    onProductList: () -> Unit,
     favouriteRecipes: FavouriteRecipes,
     isDarkTheme: Boolean,
     searchText: String,
-    myViewModel: MyViewModel
+    myViewModel: MyViewModel,
+    expanded: Boolean
 ) {
     // State to manage selected cuisine and favorite recipe toggle
     var cuisine by remember { mutableStateOf("") }
@@ -76,79 +84,95 @@ fun RecipeListScreen(
             contentColor = MaterialTheme.colors.onBackground,
             modifier = Modifier.fillMaxSize()
         ){
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .padding(top = 50.dp)
-            ){
-                Column(
-                    modifier = Modifier.padding(vertical = 10.dp)
-                ) {
-                    Text(
-                        text = "Cuisines",
-                        fontStyle = FontStyle.Italic,
-                        style = MaterialTheme.typography.h4
-                    )
-                    Spacer(Modifier.height(15.dp))
-                    LazyRow (
-                        contentPadding = PaddingValues(horizontal = 5.dp)
-                    ){
-                        items(allRecipes) { recipe ->
-                            Box(
-                                modifier = Modifier.clickable {
-                                    cuisine = recipe.cuisine
-                                }
-                            ){
-                                CatergoryImage(recipe = recipe)
-                                Surface(
-                                    color = MaterialTheme.colors.surface
-                                ) {
-                                    Text(
-                                        text = recipe.cuisine,
-                                        style = MaterialTheme.typography.h6,
-                                        fontStyle = FontStyle.Italic,
-                                        modifier = Modifier.padding(horizontal = 2.dp)
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.width(10.dp))
+            Row {
+                if(expanded) {
+                    AnimatedVisibility(
+                        visible = expanded,
+                        enter = slideInHorizontally(),
+                        exit = slideOutHorizontally(
+                            animationSpec = spring(stiffness = Spring.StiffnessHigh)
+                        )
+                    ) {
+                        Row {
+                            MenuBar(onRecipeList, onProductList)
+                            Divider(modifier = Modifier.width(5.dp).fillMaxHeight())
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(5.dp))
-                Box(
-                    modifier = Modifier
-                        .border(shape = CircleShape, color = Color.Black, width = 1.dp)
-                        .padding(3.dp)
-                        .clickable { favRec = !favRec }
-                ) {
-                    Text(
-                        text = "Favourites",
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp),
-                        style = MaterialTheme.typography.h4
-                    )
-                }
-                Spacer(modifier = Modifier.height(5.dp))
                 Column(
-                    modifier = Modifier.padding(vertical = 10.dp)
-                ) {
-                    Text(
-                        text = "Recipes",
-                        fontStyle = FontStyle.Italic,
-                        style = MaterialTheme.typography.h4
-                    )
-                    Spacer(Modifier.height(15.dp))
-                    LazyVerticalGrid(
-                        columns = gridCells, // Dynamic grid cells based on width
-                        horizontalArrangement = Arrangement.spacedBy(5.dp) // Space between items
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 50.dp)
+                ){
+                    Column(
+                        modifier = Modifier.padding(vertical = 10.dp)
                     ) {
-                        items(if(!favRec) recipes else favRecipes) { recipe -> // Display either all or favorite recipes
-                            RecipeCard(
-                                recipe = recipe,
-                                onClick = { onRecipeSelected(recipe.id.toString()) },
-                                favouriteRecipes = favouriteRecipes
-                            )
+                        Text(
+                            text = "Cuisines",
+                            fontStyle = FontStyle.Italic,
+                            style = MaterialTheme.typography.h4
+                        )
+                        Spacer(Modifier.height(15.dp))
+                        LazyRow (
+                            contentPadding = PaddingValues(horizontal = 5.dp)
+                        ){
+                            items(allRecipes) { recipe ->
+                                Box(
+                                    modifier = Modifier.clickable {
+                                        cuisine = recipe.cuisine
+                                    }
+                                ){
+                                    CatergoryImage(recipe = recipe)
+                                    Surface(
+                                        color = MaterialTheme.colors.surface
+                                    ) {
+                                        Text(
+                                            text = recipe.cuisine,
+                                            style = MaterialTheme.typography.h6,
+                                            fontStyle = FontStyle.Italic,
+                                            modifier = Modifier.padding(horizontal = 2.dp)
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.width(10.dp))
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Box(
+                        modifier = Modifier
+                            .border(shape = CircleShape, color = Color.Black, width = 1.dp)
+                            .padding(3.dp)
+                            .clickable { favRec = !favRec }
+                    ) {
+                        Text(
+                            text = "Favourites",
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp),
+                            style = MaterialTheme.typography.h4
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(5.dp))
+                    Column(
+                        modifier = Modifier.padding(vertical = 10.dp)
+                    ) {
+                        Text(
+                            text = "Recipes",
+                            fontStyle = FontStyle.Italic,
+                            style = MaterialTheme.typography.h4
+                        )
+                        Spacer(Modifier.height(15.dp))
+                        LazyVerticalGrid(
+                            columns = gridCells, // Dynamic grid cells based on width
+                            horizontalArrangement = Arrangement.spacedBy(5.dp) // Space between items
+                        ) {
+                            items(if(!favRec) recipes else favRecipes) { recipe -> // Display either all or favorite recipes
+                                RecipeCard(
+                                    recipe = recipe,
+                                    onClick = { onRecipeSelected(recipe.id.toString()) },
+                                    favouriteRecipes = favouriteRecipes
+                                )
+                            }
                         }
                     }
                 }

@@ -12,8 +12,6 @@ import io.ktor.client.HttpClient
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.IconButton
 import androidx.compose.ui.Modifier
@@ -26,7 +24,7 @@ import recipedemo.composeapp.generated.resources.white_star
 import recipedemo.composeapp.generated.resources.yellow_star
 
 @Composable
-fun Image(recipe: Recipe, favouriteRecipes: FavouriteRecipes, imgModifier: Modifier, iconModifier: Modifier, flag: Boolean) {
+fun RecipeImage(recipe: Recipe, favouriteRecipes: FavouriteRecipes, imgModifier: Modifier, iconModifier: Modifier, flag: Boolean) {
     // a coroutine scope for launching suspend functions / asynchronous tasks
     val scope = rememberCoroutineScope()
     // an ImageLoader instance to load images over the network
@@ -45,10 +43,11 @@ fun Image(recipe: Recipe, favouriteRecipes: FavouriteRecipes, imgModifier: Modif
                 val remoteImage  = imageLoader.loadImage(ImageResource.Url(recipe.image))
                 image = remoteImage
             } catch (e: Exception) {
-                println("Error finding image: ${e.message}")
+                println("Error finding recipe image: ${e.message}")
             }
         }
     }
+
     //If the image is successfully loaded, display it inside a Box
     if(image!=null) {
         Box {

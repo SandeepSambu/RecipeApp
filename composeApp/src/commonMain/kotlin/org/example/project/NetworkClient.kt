@@ -27,7 +27,11 @@ class NetworkClient {
     }
 
     // Suspend function to fetch data from a given URL and return it as a Response object.
-    suspend fun fetchData(url: String): Response {
+    suspend fun fetchRecipeData(url: String): Response {
+        return client.get(url).body()
+    }
+
+    suspend fun fetchProductData(url: String): ProductList {
         return client.get(url).body()
     }
 

@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
@@ -19,7 +20,8 @@ import kotlinx.browser.window
 fun main() {
     ComposeViewport(document.body!!) {
         val myViewModel = MyViewModel()
-        myViewModel.fetchAndShowData()
+        myViewModel.fetchRecipeData()
+        myViewModel.fetchProductsData()
 
         // State to track the current theme (dark or light)
         var isDarkTheme by remember { mutableStateOf(window.matchMedia("(prefers-color-scheme: dark)").matches) }
@@ -33,11 +35,14 @@ fun main() {
         // State to manage the current route
         var currentRoute by remember { mutableStateOf<Route>(Route.RecipeList) }
 
+        var expanded by rememberSaveable { mutableStateOf(false) }
+
         // Function to update the current route based on the URL hash
         val updateRouteFromHash: () -> Unit = {
             val hash = window.location.hash
             currentRoute = when {
                 hash.startsWith("#/recipe/") -> Route.RecipeDetail(hash.substringAfter("/recipe/"))
+                hash.contains("#/products/") -> Route.ProductList
                 else -> Route.RecipeList
             }
         }
@@ -51,12 +56,24 @@ fun main() {
             is Route.RecipeList -> RecipeListScreen(
                 onRecipeSelected = { recipeId ->
                     window.location.hash = "#/recipe/$recipeId" // Update the hash to reflect the selected recipe
-                    currentRoute = Route.RecipeDetail(recipeId) // Update current route to RecipeDetail
+                    currentRoute = Route.RecipeDetail(recipeId) // Update current route to RecipeDetail,
+                    expanded = false
+                },
+                onRecipeList = {
+                    window.location.hash = "#/"
+                    currentRoute = Route.RecipeList
+                    expanded = false
+                },
+                onProductList = {
+                    window.location.hash = "#/products/"
+                    currentRoute = Route.ProductList
+                    expanded = false
                 },
                 favouriteRecipes = favouriteRecipes,
                 isDarkTheme = isDarkTheme,
                 searchText = searchText,
-                myViewModel = myViewModel
+                myViewModel = myViewModel,
+                expanded = expanded
             )
             is Route.RecipeDetail -> RecipeDetailScreen(
                 recipeId = (currentRoute as Route.RecipeDetail).recipeId, // Extract recipeId from the current route
@@ -65,6 +82,21 @@ fun main() {
                 favouriteRecipes = favouriteRecipes
             )
 
+            is Route.ProductList -> ProductListScreen(
+                isDarkTheme = isDarkTheme,
+                myViewModel = myViewModel,
+                expanded = expanded,
+                onRecipeList = {
+                    window.location.hash = "#/"
+                    currentRoute = Route.RecipeList
+                    expanded = false
+                },
+                onProductList = {
+                    window.location.hash = "#/products/"
+                    currentRoute = Route.ProductList
+                    expanded = false
+                }
+            )
         }
         // Apply MaterialTheme for consistent styling
         MaterialTheme(
@@ -79,10 +111,12 @@ fun main() {
                         onHome = {
                             window.location.hash = "#/" // Reset hash to go to RecipeList
                             currentRoute = Route.RecipeList // Set current route to RecipeList
+                            expanded = false
                         },
                         searchText = searchText,
                         onSearchTextChange = { newText -> searchText = newText },
-                        onThemeChange = { isDarkTheme = !isDarkTheme }
+                        onThemeChange = { isDarkTheme = !isDarkTheme },
+                        expanded = { expanded = !expanded }
                     )
                     MyApp(currentRoute = currentRoute, onRenderRoute = { onRenderRoute })
                 }

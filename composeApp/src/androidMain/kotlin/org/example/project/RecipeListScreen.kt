@@ -1,10 +1,14 @@
 package org.example.project
 
 import android.content.res.Configuration
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,9 +24,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
@@ -51,14 +53,15 @@ fun RecipeListScreen(
     searchText: String,
     isDarkTheme: Boolean,
     paddingValues: PaddingValues,
-    myViewModel: MyViewModel
+    myViewModel: MyViewModel,
+    expanded: Boolean
 ) {
     val localConfiguration = LocalConfiguration.current
 
     // State to manage selected cuisine and favorite recipe toggle
     var cuisine by remember { mutableStateOf("") }
 
-    // mutable state to toggle the favourite recipes to display, rememberSaveable to persis the screen rotation
+    // mutable state to toggle the favourite recipes to display, rememberSaveable to persist the screen rotation
     var favRec by rememberSaveable { mutableStateOf(false) }
     val allRecipes = RecipeRepository(myViewModel).getAllRecipes()
 
@@ -70,6 +73,8 @@ fun RecipeListScreen(
 
     // Get favorite recipes based on selected cuisine
     val favRecipes = if(cuisine.isNotEmpty()) favouriteRecipes.getFav_Rec_Category(cuisine) else favouriteRecipes.favRecipes
+
+    Log.d("Recipes", "$recipes")
     MaterialTheme(
         colorScheme = if(isDarkTheme) darkColorScheme() else lightColorScheme()
     ) {
@@ -78,108 +83,10 @@ fun RecipeListScreen(
             contentColor = MaterialTheme.colorScheme.onBackground
         ){
             if(localConfiguration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                Column(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .padding(horizontal = 20.dp)
-                        .fillMaxSize()
-                ){
+                Box {
                     Column(
-                        modifier = Modifier.padding(vertical = 10.dp)
-                    ) {
-                        Text(
-                            text = "Cuisines",
-                            fontStyle = FontStyle.Italic,
-                            style = MaterialTheme.typography.displaySmall
-                        )
-                        Spacer(Modifier.height(15.dp))
-                        LazyRow (
-                            contentPadding = PaddingValues(horizontal = 5.dp)
-                        ){
-                            items(allRecipes) { recipe ->
-                                Box(
-                                    modifier = Modifier
-                                        .clickable {
-                                            cuisine = recipe.cuisine
-                                        }
-                                        .testTag("Cuisine_${recipe.cuisine}")
-                                ){
-                                    CategoryImage(recipe = recipe)
-                                    Surface(
-                                        color = MaterialTheme.colorScheme.surfaceVariant
-                                    ) {
-                                        Text(
-                                            text = recipe.cuisine,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontStyle = FontStyle.Italic,
-                                            modifier = Modifier.padding(horizontal = 2.dp)
-                                        )
-                                    }
-                                }
-                                Spacer(Modifier.width(10.dp))
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(5.dp))
-                    Box(
                         modifier = Modifier
-                            .border(shape = CircleShape, color = Color.Black, width = 1.dp)
-                            .padding(3.dp)
-                            .testTag("FavouriteButton")
-                            .clickable { favRec = !favRec }
-                    ) {
-                        Text(
-                            text = "Favourites",
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(5.dp))
-                    Column(
-                        modifier = Modifier.padding(vertical = 10.dp)
-                    ) {
-                        Text(
-                            text = "Recipes",
-                            fontStyle = FontStyle.Italic,
-                            style = MaterialTheme.typography.displaySmall
-                        )
-                        Spacer(Modifier.height(15.dp))
-                        LazyVerticalGrid(columns = GridCells.Fixed(2)) {
-                            items(if(!favRec) recipes  else favRecipes) { recipe ->
-                                RecipeCard(
-                                    recipe = recipe,
-                                    onClick = {
-                                        navController.navigate("recipe_detail/${recipe.id}")
-                                    },
-                                    favouriteRecipes = favouriteRecipes
-                                )
-                            }
-                        }
-                    }
-                }
-            } else {
-                Spacer(modifier = Modifier.height(5.dp))
-                Column(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .border(shape = CircleShape, color = Color.Black, width = 1.dp)
-                            .padding(3.dp)
-                            .testTag("FavouriteButton")
-                            .clickable { favRec = !favRec }
-                    ) {
-                        Text(
-                            text = "Favourites",
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
+                            .padding(paddingValues)
                             .padding(horizontal = 20.dp)
                             .fillMaxSize()
                     ){
@@ -189,10 +96,10 @@ fun RecipeListScreen(
                             Text(
                                 text = "Cuisines",
                                 fontStyle = FontStyle.Italic,
-                                style = MaterialTheme.typography.titleLarge
+                                style = MaterialTheme.typography.displaySmall
                             )
                             Spacer(Modifier.height(15.dp))
-                            LazyColumn (
+                            LazyRow (
                                 contentPadding = PaddingValues(horizontal = 5.dp)
                             ){
                                 items(allRecipes) { recipe ->
@@ -219,18 +126,32 @@ fun RecipeListScreen(
                                 }
                             }
                         }
-                        Spacer(modifier = Modifier.width(5.dp))
+                        Spacer(modifier = Modifier.height(5.dp))
+                        Box(
+                            modifier = Modifier
+                                .border(shape = CircleShape, color = Color.Black, width = 1.dp)
+                                .padding(3.dp)
+                                .testTag("FavouriteButton")
+                                .clickable { favRec = !favRec }
+                        ) {
+                            Text(
+                                text = "Favourites",
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(5.dp))
                         Column(
                             modifier = Modifier.padding(vertical = 10.dp)
                         ) {
                             Text(
                                 text = "Recipes",
                                 fontStyle = FontStyle.Italic,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(start = 300.dp)
+                                style = MaterialTheme.typography.displaySmall
                             )
                             Spacer(Modifier.height(15.dp))
-                            LazyVerticalGrid(columns = GridCells.Fixed(3)) {
+                            LazyVerticalGrid(columns = GridCells.Fixed(2)) {
                                 items(if(!favRec) recipes  else favRecipes) { recipe ->
                                     RecipeCard(
                                         recipe = recipe,
@@ -239,6 +160,108 @@ fun RecipeListScreen(
                                         },
                                         favouriteRecipes = favouriteRecipes
                                     )
+                                }
+                            }
+                        }
+                    }
+                    AnimatedVisibility(
+                        visible = expanded,
+                        enter = slideInHorizontally(),
+                        exit = slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh))
+                    ) {
+                        MenuBar(navController = navController)
+                    }
+                }
+            } else {
+                Spacer(modifier = Modifier.height(5.dp))
+                Row {
+                    AnimatedVisibility(
+                        visible = expanded,
+                        enter = slideInHorizontally(),
+                        exit = slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessHigh))
+                    ) {
+                        MenuBar(navController = navController)
+                    }
+                    Column(
+                        modifier = Modifier
+                            .padding(paddingValues)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .border(shape = CircleShape, color = Color.Black, width = 1.dp)
+                                .padding(3.dp)
+                                .testTag("FavouriteButton")
+                                .clickable { favRec = !favRec }
+                        ) {
+                            Text(
+                                text = "Favourites",
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp)
+                                .fillMaxSize()
+                        ){
+                            Column(
+                                modifier = Modifier.padding(vertical = 10.dp)
+                            ) {
+                                Text(
+                                    text = "Cuisines",
+                                    fontStyle = FontStyle.Italic,
+                                    style = MaterialTheme.typography.titleLarge
+                                )
+                                Spacer(Modifier.height(15.dp))
+                                LazyColumn (
+                                    contentPadding = PaddingValues(horizontal = 5.dp)
+                                ){
+                                    items(allRecipes) { recipe ->
+                                        Box(
+                                            modifier = Modifier
+                                                .clickable {
+                                                    cuisine = recipe.cuisine
+                                                }
+                                                .testTag("Cuisine_${recipe.cuisine}")
+                                        ){
+                                            CategoryImage(recipe = recipe)
+                                            Surface(
+                                                color = MaterialTheme.colorScheme.surfaceVariant
+                                            ) {
+                                                Text(
+                                                    text = recipe.cuisine,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontStyle = FontStyle.Italic,
+                                                    modifier = Modifier.padding(horizontal = 2.dp)
+                                                )
+                                            }
+                                        }
+                                        Spacer(Modifier.width(10.dp))
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Column(
+                                modifier = Modifier.padding(vertical = 10.dp)
+                            ) {
+                                Text(
+                                    text = "Recipes",
+                                    fontStyle = FontStyle.Italic,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier.padding(start = 300.dp)
+                                )
+                                Spacer(Modifier.height(15.dp))
+                                LazyVerticalGrid(columns = if(expanded) GridCells.Fixed(2) else GridCells.Fixed(3)) {
+                                    items(if(!favRec) recipes  else favRecipes) { recipe ->
+                                        RecipeCard(
+                                            recipe = recipe,
+                                            onClick = {
+                                                navController.navigate("recipe_detail/${recipe.id}")
+                                            },
+                                            favouriteRecipes = favouriteRecipes
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -260,6 +283,7 @@ fun RecipeListPreview() {
         searchText = "",
         isDarkTheme = false,
         paddingValues = PaddingValues(),
-        myViewModel = myViewModel
+        myViewModel = myViewModel,
+        expanded = false
     )
 }
